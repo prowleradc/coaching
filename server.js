@@ -60,7 +60,7 @@ app.post('/create-checkout-session', async (req, res) => {
                         currency: 'aud',
                         product_data: {
                             name: 'ADC Coaching',
-                            description: `1-on-1 Coaching session with Prowler.`,
+                            description: `1-on-1 Coaching Session.`,
                         },
                         unit_amount: amount,
                     },
