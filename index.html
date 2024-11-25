@@ -13,23 +13,23 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #6b73ff, #000dff);
-            color: #444;
+            background: linear-gradient(135deg, #2a1a16, #3c2b26);
+            color: #f0e8d5;
         }
         .form-container {
-            background-color: #ffffff;
+            background-color: #1d1511;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             max-width: 500px;
             width: 100%;
         }
         .form-container h1 {
             font-size: 28px;
-            color: #333;
+            color: #f0e8d5;
             margin-bottom: 25px;
             text-align: center;
-            border-bottom: 2px solid #6b73ff;
+            border-bottom: 2px solid #8b6e4e;
             padding-bottom: 10px;
         }
         .form-group {
@@ -39,19 +39,22 @@
             display: block;
             font-weight: 600;
             margin-bottom: 8px;
+            color: #8b6e4e;
         }
         .form-group input,
         .form-group select {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #8b6e4e;
             border-radius: 6px;
             font-size: 14px;
+            background-color: #2a1a16;
+            color: #f0e8d5;
         }
         .form-group input:focus {
             outline: none;
-            border-color: #6b73ff;
-            box-shadow: 0 0 5px rgba(107, 115, 255, 0.5);
+            border-color: #e6a93f;
+            box-shadow: 0 0 5px rgba(230, 169, 63, 0.5);
         }
         input[type="radio"] {
             appearance: none;
@@ -60,7 +63,7 @@
             display: inline-block;
             width: 18px;
             height: 18px;
-            border: 2px solid #ddd;
+            border: 2px solid #8b6e4e;
             border-radius: 50%;
             position: relative;
             outline: none;
@@ -68,14 +71,15 @@
             vertical-align: middle;
         }
         input[type="radio"]:checked {
-            background-color: #6b73ff;
-            border-color: #6b73ff;
+            background-color: #e6a93f;
+            border-color: #e6a93f;
         }
         .form-group .radio-label {
             margin-right: 15px;
             display: flex;
             align-items: center;
             font-size: 14px;
+            color: #f0e8d5;
         }
         .form-group .radio-label span {
             margin-left: 8px;
@@ -84,8 +88,8 @@
             text-align: center;
         }
         .form-submit button {
-            background-color: #6b73ff;
-            color: white;
+            background-color: #e6a93f;
+            color: #1d1511;
             padding: 12px 25px;
             border: none;
             border-radius: 6px;
@@ -94,7 +98,8 @@
             transition: all 0.3s ease;
         }
         .form-submit button:hover {
-            background-color: #000dff;
+            background-color: #f0e8d5;
+            color: #1d1511;
         }
         @media (max-width: 600px) {
             .form-container {
@@ -110,7 +115,7 @@
         }
         .gst-note {
             font-size: 12px;
-            color: #666;
+            color: #8b6e4e;
             text-align: right;
             margin-top: 20px;
         }
@@ -123,15 +128,15 @@
         <form id="payment-form" autocomplete="off">
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="off">
+                <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="off" style="width: 90%;">
             </div>
             <div class="form-group">
                 <label for="ign">IGN with #:</label>
-                <input type="text" id="ign" name="ign" placeholder="Enter your in-game name" required autocomplete="off">
+                <input type="text" id="ign" name="ign" placeholder="Enter your in-game name" required autocomplete="off" style="width: 90%;">
             </div>
             <div class="form-group">
                 <label for="discord">Discord:</label>
-                <input type="text" id="discord" name="discord" placeholder="Enter your Discord ID" required autocomplete="off">
+                <input type="text" id="discord" name="discord" placeholder="Enter your Discord ID" required autocomplete="off" style="width: 90%;">
             </div>
             <div class="form-group">
                 <label>Coaching Option:</label>
