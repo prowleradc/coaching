@@ -84,6 +84,35 @@
         .form-group .radio-label span {
             margin-left: 8px;
         }
+        .form-group .tooltip {
+            margin-left: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        .form-group .tooltip img {
+            width: 40px; /* Increased image size */
+            height: 40px; /* Increased image size */
+        }
+        .tooltip-text {
+            visibility: hidden;
+            background-color: #555;
+            color: #fff;
+            text-align: left;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            left: 100%; /* Move tooltip to the right of the icon */
+            margin-left: 10px; /* Space between icon and tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: auto; /* Allow tooltip to expand based on content */
+            min-width: 120px; /* Set a minimum width to avoid too narrow tooltips */
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
         .form-submit {
             text-align: center;
         }
@@ -144,18 +173,30 @@
                     <label class="radio-label">
                         <input type="radio" name="coaching_option" value="7000" required>
                         <span>Option 1: $70 AUD - 90 minutes</span>
+                        <div class="tooltip">
+                            <img src="https://cdn.shopify.com/s/files/1/0886/5156/3311/files/tooltip_png.png?v=1732520138" alt="Info Icon">
+                            <span class="tooltip-text">45 Minutes Live Spectate (You Play) + 45 Minutes VOD Review</span>
+                        </div>
                     </label>
                 </div>
                 <div>
                     <label class="radio-label">
                         <input type="radio" name="coaching_option" value="7000" required>
                         <span>Option 2: $70 AUD - 90 minutes</span>
+                        <div class="tooltip">
+                            <img src="https://cdn.shopify.com/s/files/1/0886/5156/3311/files/tooltip_png.png?v=1732520138" alt="Info Icon">
+                            <span class="tooltip-text">45 Minutes Live Game (I Play) + 45 Minutes VOD Review</span>
+                        </div>
                     </label>
                 </div>
                 <div>
                     <label class="radio-label">
                         <input type="radio" name="coaching_option" value="5000">
                         <span>Option 3: $50 AUD - 60 minutes</span>
+                        <div class="tooltip">
+                            <img src="https://cdn.shopify.com/s/files/1/0886/5156/3311/files/tooltip_png.png?v=1732520138" alt="Info Icon">
+                            <span class="tooltip-text">2 Games VOD Review (Pre-Recorded Games)</span>
+                        </div>
                     </label>
                 </div>
                 <div class="gst-note">All listed prices are inclusive of GST.</div>
@@ -181,6 +222,11 @@
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(email)) {
                 alert('Please enter a valid email address.');
+                return false;
+            }
+
+            if (!ign.includes('#')) {
+                alert('Please enter a valid IGN with a "#" symbol.');
                 return false;
             }
 
