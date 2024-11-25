@@ -198,7 +198,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:3000/create-checkout-session', {
+                const response = await fetch('https://coaching-a9600bedef33.herokuapp.com/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ amount })
