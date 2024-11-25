@@ -59,8 +59,8 @@ app.post('/create-checkout-session', async (req, res) => {
                     price_data: {
                         currency: 'aud',
                         product_data: {
-                            name: 'Coaching Session',
-                            description: `Coaching session for ${amount / 100} AUD.`,
+                            name: 'ADC Coaching',
+                            description: `1-on-1 Coaching session with Prowler.`,
                         },
                         unit_amount: amount,
                     },
@@ -68,8 +68,8 @@ app.post('/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `${FRONTEND_URL}/success`,
-            cancel_url: `${FRONTEND_URL}/cancel`,
+            success_url: `${FRONTEND_URL}/thank_you`,
+            cancel_url: `${FRONTEND_URL}`,
         });
 
         res.json({ url: session.url });
