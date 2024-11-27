@@ -17,9 +17,9 @@ if (!process.env.STRIPE_TEST_SECRET_KEY && !process.env.STRIPE_LIVE_SECRET_KEY) 
 }
 
 // Configure CORS
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['https://prowleradc.github.io'];
+const allowedOrigins = [
+    'https://prowleradc.github.io/coaching'
+];
 
 app.use(cors({
     origin: (origin, callback) => {
