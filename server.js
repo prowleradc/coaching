@@ -60,7 +60,7 @@ const sendConfirmationEmail = async (data) => {
 
     const mailOptions = {
         from: process.env.SMTP_USER,
-        to: email, // send to customer email or admin email
+        to: email, // Send to customer email or admin email
         subject: 'Coaching Session Confirmation',
         html: `
             <h1>Coaching Session Confirmation</h1>
@@ -77,7 +77,7 @@ const sendConfirmationEmail = async (data) => {
         `
     };
 
-    console.log(`Attempting to send confirmation email to: ${email}`);  // Log the email recipient
+    console.log(`Attempting to send confirmation email to: ${email}`); // Log the email recipient
 
     try {
         await transporter.sendMail(mailOptions);
@@ -143,6 +143,7 @@ app.post('/create-checkout-session', async (req, res) => {
             metadata: { email, ign, discord, coachingOption, amount }
         });
 
+        console.log('Checkout session created:', session.id); // Log the session ID
         res.json({ url: session.url });
     } catch (error) {
         console.error('Stripe Checkout Session Error:', error.message);
@@ -157,25 +158,23 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
     let event;
     try {
-        console.log('Webhook received...');
+        console.log('Webhook received...'); // Initial log
         event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
-        console.log('Event received:', event);  // Log event to check
+        console.log('Event received and verified:', event.type); // Log verified event type
     } catch (err) {
         console.error('Webhook signature verification failed:', err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle checkout.session.completed event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
         console.log('Checkout session completed:', session);
 
-        // Send confirmation email after successful payment
         try {
-            // Check if metadata is correct
-            console.log(`Session metadata: ${JSON.stringify(session.metadata)}`);
-            
-            // Sending confirmation email to the user
+            // Log metadata before sending emails
+            console.log('Session metadata:', session.metadata);
+
+            // Send confirmation email to user
             await sendConfirmationEmail({
                 email: session.metadata.email,
                 ign: session.metadata.ign,
@@ -183,24 +182,23 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 coachingOption: session.metadata.coachingOption,
                 amount: session.amount_total
             });
-            console.log('Confirmation email sent to user successfully');
+            console.log('User confirmation email sent successfully.');
 
-            // Sending confirmation email to the admin (prowleradc@gmail.com)
-            console.log('Sending confirmation email to admin...');
+            // Send confirmation email to admin
             await sendConfirmationEmail({
-                email: 'prowleradc@gmail.com',  // Admin email
+                email: 'prowleradc@gmail.com',
                 ign: session.metadata.ign,
                 discord: session.metadata.discord,
                 coachingOption: session.metadata.coachingOption,
                 amount: session.amount_total
             });
-            console.log('Confirmation email sent to admin successfully');
+            console.log('Admin confirmation email sent successfully.');
         } catch (error) {
-            console.error('Error sending confirmation email:', error.message);
+            console.error('Error processing confirmation emails:', error.message);
         }
     }
 
-    res.status(200).send('Webhook received successfully');
+    res.status(200).send('Webhook received successfully.');
 });
 
 // Start the server
