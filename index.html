@@ -159,21 +159,21 @@
         <form id="payment-form" autocomplete="off">
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="off" style="width: 90%;">
+                <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="off">
             </div>
             <div class="form-group">
                 <label for="ign">IGN with #:</label>
-                <input type="text" id="ign" name="ign" placeholder="Enter your in-game name" required autocomplete="off" style="width: 90%;">
+                <input type="text" id="ign" name="ign" placeholder="Enter your in-game name" required autocomplete="off">
             </div>
             <div class="form-group">
                 <label for="discord">Discord:</label>
-                <input type="text" id="discord" name="discord" placeholder="Enter your Discord ID" required autocomplete="off" style="width: 90%;">
+                <input type="text" id="discord" name="discord" placeholder="Enter your Discord ID" required autocomplete="off">
             </div>
             <div class="form-group">
                 <label>Coaching Option:</label>
                 <div>
                     <label class="radio-label">
-                        <input type="radio" name="coaching_option" value="7000" required>
+                        <input type="radio" name="coaching_option" value="option1" data-amount="7000">
                         <span>Option 1: $70 AUD - 90 minutes</span>
                         <div class="tooltip">
                             <img src="https://cdn.shopify.com/s/files/1/0886/5156/3311/files/revolver.png?v=1732558994" alt="Info Icon">
@@ -183,7 +183,7 @@
                 </div>
                 <div>
                     <label class="radio-label">
-                        <input type="radio" name="coaching_option" value="7000" required>
+                        <input type="radio" name="coaching_option" value="option2" data-amount="7000">
                         <span>Option 2: $70 AUD - 90 minutes</span>
                         <div class="tooltip">
                             <img src="https://cdn.shopify.com/s/files/1/0886/5156/3311/files/revolver.png?v=1732558994" alt="Info Icon">
@@ -193,7 +193,7 @@
                 </div>
                 <div>
                     <label class="radio-label">
-                        <input type="radio" name="coaching_option" value="5000">
+                        <input type="radio" name="coaching_option" value="option3" data-amount="5000">
                         <span>Option 3: $50 AUD - 60 minutes</span>
                         <div class="tooltip">
                             <img src="https://cdn.shopify.com/s/files/1/0886/5156/3311/files/revolver.png?v=1732558994" alt="Info Icon">
@@ -246,17 +246,16 @@
             const ign = document.getElementById('ign').value.trim();
             const discord = document.getElementById('discord').value.trim();
 
-            // Extract the selected coaching option and tooltip-text
             const selectedOption = document.querySelector('input[name="coaching_option"]:checked');
-            const coachingOption = selectedOption
-                ? selectedOption.closest('.radio-label').querySelector('.tooltip-text').innerText
-                : '';
-            const amount = selectedOption ? parseInt(selectedOption.value) : 0;
+            const coachingOption = selectedOption ? selectedOption.value : '';
+            const amount = selectedOption ? parseInt(selectedOption.getAttribute('data-amount'), 10) : 0;
 
-            if (!amount) {
+            if (!coachingOption || !amount) {
                 alert('Please select a coaching option.');
                 return;
             }
+
+            console.log({ email, ign, discord, coachingOption, amount }); // Debugging log
 
             try {
                 const response = await fetch('https://coaching-a9600bedef33.herokuapp.com/create-checkout-session', {
