@@ -93,26 +93,6 @@ const sendConfirmationEmail = async (formData) => {
     }
 };
 
-// Test route
-app.post('/send-test-email', async (req, res) => {
-    const { email, ign, discord, coachingOption, amount } = req.body;
-
-    // Validate input
-    if (!email || !ign || !discord || !coachingOption || !amount) {
-        return res.status(400).json({ error: 'All fields are required.' });
-    }
-
-    try {
-        // Call the email function
-        await sendConfirmationEmail({ email, ign, discord, coachingOption, amount });
-        res.json({ message: 'Test email sent successfully' });
-    } catch (error) {
-        console.error('Error sending test email:', error.message);
-        res.status(500).json({ error: 'Failed to send test email' });
-    }
-});
-
-
 // Create Checkout Session route
 app.post('/create-checkout-session', async (req, res) => {
     try {
@@ -143,8 +123,6 @@ app.post('/create-checkout-session', async (req, res) => {
             return res.status(400).json({ error: 'Invalid coaching option selected.' });
         }
 
-        console.log('Creating Stripe session for:', { email, coachingOption, amount });
-
         const FRONTEND_URL = process.env.FRONTEND_URL || 'https://prowleradc.github.io';
 
         const session = await stripe.checkout.sessions.create({
@@ -163,8 +141,8 @@ app.post('/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `${FRONTEND_URL}thank_you`,
-            cancel_url: `${FRONTEND_URL}`,
+            success_url: `${FRONTEND_URL}/thank_you`,
+            cancel_url: `${FRONTEND_URL}/`,
             metadata: { email, ign, discord, coachingOption, amount }
         });
 
@@ -182,7 +160,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
     let event;
     try {
-        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+        event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
     } catch (err) {
         console.error('Webhook signature verification failed:', err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -199,18 +177,15 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         console.log('Session metadata:', session.metadata);
 
         // Send confirmation email
-        await sendConfirmationEmail({ email, ign, discord, coachingOption, amount });
+        try {
+            await sendConfirmationEmail({ email, ign, discord, coachingOption, amount });
+            console.log('Email sent successfully for session:', session.id);
+        } catch (emailError) {
+            console.error('Error sending confirmation email:', emailError.message);
+        }
     }
 
     res.status(200).send('Webhook received successfully');
-});
-
-// Centralized Error Handling Middleware
-app.use((err, req, res, next) => {
-    console.error('Unhandled Error:', err.message);
-    res.status(err.status || 500).json({
-        error: err.message || 'Internal server error.'
-    });
 });
 
 // Start the server
