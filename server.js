@@ -61,7 +61,7 @@ const sendConfirmationEmail = async (formData) => {
 
     const emailBody = `
         <h1>Coaching Session Confirmation</h1>
-        <p>Thank you for booking a coaching session with me!</p>
+        <p>Thank you for booking a coaching session with ProwlerADC!</p>
         <h3>Details:</h3>
         <ul>
             <li><strong>Email:</strong> ${email}</li>
@@ -70,7 +70,7 @@ const sendConfirmationEmail = async (formData) => {
             <li><strong>Coaching Option:</strong> ${coachingOption}</li>
             <li><strong>Amount Paid:</strong> $${(amount / 100).toFixed(2)} AUD</li>
         </ul>
-        <p>I look forward to helping you improve. If you have any questions, feel free to reach out!</p>
+        <p>We look forward to helping you improve your gameplay. If you have any questions, feel free to reach out!</p>
     `;
 
     const mailOptions = {
@@ -111,7 +111,7 @@ app.post('/create-checkout-session', async (req, res) => {
                     price_data: {
                         currency: 'aud',
                         product_data: {
-                            name: `Coaching Option: ${coachingOption}`,
+                            name: coachingOption, // Tooltip-text passed from frontend
                             description: '1-on-1 Coaching Session'
                         },
                         unit_amount: amount,

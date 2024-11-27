@@ -245,8 +245,12 @@
             const email = document.getElementById('email').value.trim();
             const ign = document.getElementById('ign').value.trim();
             const discord = document.getElementById('discord').value.trim();
+
+            // Extract the selected coaching option and tooltip-text
             const selectedOption = document.querySelector('input[name="coaching_option"]:checked');
-            const coachingOption = selectedOption ? selectedOption.nextElementSibling.innerText : '';
+            const coachingOption = selectedOption
+                ? selectedOption.closest('.radio-label').querySelector('.tooltip-text').innerText
+                : '';
             const amount = selectedOption ? parseInt(selectedOption.value) : 0;
 
             if (!amount) {
