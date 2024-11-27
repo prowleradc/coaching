@@ -18,18 +18,24 @@ if (!process.env.STRIPE_TEST_SECRET_KEY && !process.env.STRIPE_LIVE_SECRET_KEY) 
 
 // Configure CORS
 const allowedOrigins = [
-    'https://prowleradc.github.io/coaching'
+    'https://prowleradc.github.io' // Ensure the frontend URL is correctly listed here
 ];
 
 app.use(cors({
     origin: (origin, callback) => {
+        console.log('Incoming origin:', origin); // Debugging: log the incoming origin
         if (!origin || allowedOrigins.includes(origin)) {
+            console.log('Origin allowed:', origin); // Log allowed origins
             callback(null, true);
         } else {
+            console.log('Origin denied:', origin); // Log denied origins
             callback(new Error('Not allowed by CORS'));
         }
     }
 }));
+
+// Handle preflight requests for all routes
+app.options('*', cors());
 
 app.use(express.json());
 
@@ -55,7 +61,7 @@ const sendConfirmationEmail = async (formData) => {
 
     const emailBody = `
         <h1>Coaching Session Confirmation</h1>
-        <p>Thank you for booking a coaching session with ProwlerADC!</p>
+        <p>Thank you for booking a coaching session with me!</p>
         <h3>Details:</h3>
         <ul>
             <li><strong>Email:</strong> ${email}</li>
@@ -64,7 +70,7 @@ const sendConfirmationEmail = async (formData) => {
             <li><strong>Coaching Option:</strong> ${coachingOption}</li>
             <li><strong>Amount Paid:</strong> $${(amount / 100).toFixed(2)} AUD</li>
         </ul>
-        <p>We look forward to helping you improve your gameplay. If you have any questions, feel free to reach out!</p>
+        <p>I look forward to helping you improve. If you have any questions, feel free to reach out!</p>
     `;
 
     const mailOptions = {
@@ -84,15 +90,19 @@ app.post('/create-checkout-session', async (req, res) => {
 
         // Validate inputs
         if (!email || !ign || !discord || !coachingOption || !amount) {
+            console.error('Validation error:', { email, ign, discord, coachingOption, amount });
             return res.status(400).json({ error: 'All fields are required' });
         }
 
         const validAmounts = [7000, 5000];
         if (!validAmounts.includes(amount)) {
+            console.error('Invalid amount:', amount);
             return res.status(400).json({ error: 'Invalid coaching option selected' });
         }
 
-        const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+        console.log('Creating Stripe session for:', { email, coachingOption, amount });
+
+        const FRONTEND_URL = process.env.FRONTEND_URL || 'https://prowleradc.github.io';
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -113,6 +123,8 @@ app.post('/create-checkout-session', async (req, res) => {
             success_url: `${FRONTEND_URL}/thank_you`,
             cancel_url: `${FRONTEND_URL}`
         });
+
+        console.log('Stripe session created:', session.id);
 
         // Send confirmation email
         await sendConfirmationEmail({ email, ign, discord, coachingOption, amount });
