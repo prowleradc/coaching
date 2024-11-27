@@ -242,7 +242,11 @@
                 return;
             }
 
+            const email = document.getElementById('email').value.trim();
+            const ign = document.getElementById('ign').value.trim();
+            const discord = document.getElementById('discord').value.trim();
             const selectedOption = document.querySelector('input[name="coaching_option"]:checked');
+            const coachingOption = selectedOption ? selectedOption.nextElementSibling.innerText : '';
             const amount = selectedOption ? parseInt(selectedOption.value) : 0;
 
             if (!amount) {
@@ -254,7 +258,7 @@
                 const response = await fetch('https://coaching-a9600bedef33.herokuapp.com/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount })
+                    body: JSON.stringify({ email, ign, discord, coachingOption, amount })
                 });
 
                 const { url } = await response.json();
