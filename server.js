@@ -77,6 +77,8 @@ const sendConfirmationEmail = async (data) => {
         `
     };
 
+    console.log(`Attempting to send confirmation email to: ${email}`);  // Log the email recipient
+
     try {
         await transporter.sendMail(mailOptions);
         console.log('Confirmation email sent to:', email);
@@ -181,6 +183,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
             console.log('Confirmation email sent to user successfully');
 
             // Sending confirmation email to the admin (prowleradc@gmail.com)
+            console.log('Sending confirmation email to admin...');
             await sendConfirmationEmail({
                 email: 'prowleradc@gmail.com',  // Admin email
                 ign: session.metadata.ign,
