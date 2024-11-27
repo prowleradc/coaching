@@ -93,6 +93,26 @@ const sendConfirmationEmail = async (formData) => {
     }
 };
 
+// Test route
+app.post('/send-test-email', async (req, res) => {
+    const { email, ign, discord, coachingOption, amount } = req.body;
+
+    // Validate input
+    if (!email || !ign || !discord || !coachingOption || !amount) {
+        return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    try {
+        // Call the email function
+        await sendConfirmationEmail({ email, ign, discord, coachingOption, amount });
+        res.json({ message: 'Test email sent successfully' });
+    } catch (error) {
+        console.error('Error sending test email:', error.message);
+        res.status(500).json({ error: 'Failed to send test email' });
+    }
+});
+
+
 // Create Checkout Session route
 app.post('/create-checkout-session', async (req, res) => {
     try {
