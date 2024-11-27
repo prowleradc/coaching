@@ -23,7 +23,6 @@ if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) 
 
 // Configure CORS
 const allowedOrigins = ['https://prowleradc.github.io']; // Replace with your frontend URL
-
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
@@ -35,7 +34,14 @@ app.use(cors({
     }
 }));
 
-app.use(express.json());
+// Stripe requires raw body for webhook signature verification
+app.use(express.json({
+    verify: (req, res, buf) => {
+        if (req.originalUrl.startsWith('/webhook')) {
+            req.rawBody = buf.toString();
+        }
+    }
+}));
 
 // Root route
 app.get('/', (req, res) => {
@@ -137,19 +143,42 @@ app.post('/create-checkout-session', async (req, res) => {
             ],
             mode: 'payment',
             success_url: `${FRONTEND_URL}thank_you`,
-            cancel_url: `${FRONTEND_URL}`
+            cancel_url: `${FRONTEND_URL}`,
+            metadata: { email, ign, discord, coachingOption, amount }
         });
-
-        console.log('Stripe session created:', session.id);
-
-        // Send confirmation email
-        await sendConfirmationEmail({ email, ign, discord, coachingOption: validOptions[coachingOption].description, amount });
 
         res.json({ url: session.url });
     } catch (error) {
         console.error('Stripe Checkout Session Error:', error.message);
         res.status(500).json({ error: 'Internal server error. Please try again later.' });
     }
+});
+
+// Webhook endpoint for Stripe events
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET; // Set this in your .env file
+    const sig = req.headers['stripe-signature'];
+
+    let event;
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the checkout.session.completed event
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+
+        // Extract metadata for email
+        const { email, ign, discord, coachingOption, amount } = session.metadata;
+
+        // Send confirmation email
+        await sendConfirmationEmail({ email, ign, discord, coachingOption, amount });
+    }
+
+    res.status(200).send('Webhook received successfully');
 });
 
 // Centralized Error Handling Middleware
