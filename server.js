@@ -80,7 +80,7 @@ const sendConfirmationEmail = async (formData) => {
     try {
         const mailOptions = {
             from: process.env.SMTP_USER,
-            to: `${email}, prowleradc@gmail.com`,
+            to: `${email}, prowleradc@gmail.com`, // Send email to both the user's email and your own
             subject: 'Coaching Session Confirmation',
             html: emailBody
         };
@@ -89,6 +89,7 @@ const sendConfirmationEmail = async (formData) => {
         console.log('Confirmation email sent to:', email);
     } catch (error) {
         console.error('Error sending email:', error.message);
+        throw new Error('Failed to send confirmation email.');
     }
 };
 
@@ -173,6 +174,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
         // Extract metadata for email
         const { email, ign, discord, coachingOption, amount } = session.metadata;
+
+        // Log out the extracted metadata to verify it's correct
+        console.log('Session metadata:', session.metadata);
 
         // Send confirmation email
         await sendConfirmationEmail({ email, ign, discord, coachingOption, amount });
