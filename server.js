@@ -136,7 +136,7 @@ app.post('/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `${FRONTEND_URL}/thank_you`,
+            success_url: `${FRONTEND_URL}thank_you`,
             cancel_url: `${FRONTEND_URL}`
         });
 
