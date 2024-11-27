@@ -1,7 +1,7 @@
 require('dotenv').config(); // Load environment variables
 const express = require('express');
 const stripe = require('stripe')(
-    process.env.NODE_ENV === 'development'
+    process.env.NODE_ENV === 'production'
         ? process.env.STRIPE_LIVE_SECRET_KEY
         : process.env.STRIPE_TEST_SECRET_KEY
 );
@@ -64,7 +64,7 @@ const sendConfirmationEmail = async (data) => {
         subject: 'Coaching Session Confirmation',
         html: `
             <h1>Coaching Session Confirmation</h1>
-            <p>Thank you for booking a session with us!</p>
+            <p>Thank you for booking a session with me!</p>
             <h3>Details:</h3>
             <ul>
                 <li><strong>Email:</strong> ${email}</li>
