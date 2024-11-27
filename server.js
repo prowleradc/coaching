@@ -60,7 +60,7 @@ const sendConfirmationEmail = async (data) => {
 
     const mailOptions = {
         from: process.env.SMTP_USER,
-        to: email, // send to customer email
+        to: email, // send to customer email or admin email
         subject: 'Coaching Session Confirmation',
         html: `
             <h1>Coaching Session Confirmation</h1>
@@ -170,6 +170,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
         // Send confirmation email after successful payment
         try {
+            // Sending confirmation email to the user
             await sendConfirmationEmail({
                 email: session.metadata.email,
                 ign: session.metadata.ign,
@@ -177,7 +178,17 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 coachingOption: session.metadata.coachingOption,
                 amount: session.amount_total
             });
-            console.log('Confirmation email sent successfully');
+            console.log('Confirmation email sent to user successfully');
+
+            // Sending confirmation email to the admin (prowleradc@gmail.com)
+            await sendConfirmationEmail({
+                email: 'prowleradc@gmail.com',  // Admin email
+                ign: session.metadata.ign,
+                discord: session.metadata.discord,
+                coachingOption: session.metadata.coachingOption,
+                amount: session.amount_total
+            });
+            console.log('Confirmation email sent to admin successfully');
         } catch (error) {
             console.error('Error sending confirmation email:', error.message);
         }
