@@ -23,19 +23,13 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: (origin, callback) => {
-        console.log('Incoming origin:', origin); // Debugging: log the incoming origin
         if (!origin || allowedOrigins.includes(origin)) {
-            console.log('Origin allowed:', origin); // Log allowed origins
             callback(null, true);
         } else {
-            console.log('Origin denied:', origin); // Log denied origins
             callback(new Error('Not allowed by CORS'));
         }
     }
 }));
-
-// Handle preflight requests for all routes
-app.options('*', cors());
 
 app.use(express.json());
 
@@ -73,14 +67,19 @@ const sendConfirmationEmail = async (formData) => {
         <p>We look forward to helping you improve your gameplay. If you have any questions, feel free to reach out!</p>
     `;
 
-    const mailOptions = {
-        from: process.env.SMTP_USER,
-        to: `${email}, prowleradc@gmail.com`,
-        subject: 'Coaching Session Confirmation',
-        html: emailBody
-    };
+    try {
+        const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: `${email}, prowleradc@gmail.com`,
+            subject: 'Coaching Session Confirmation',
+            html: emailBody
+        };
 
-    await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
+        console.log('Confirmation email sent to:', email);
+    } catch (error) {
+        console.error('Email sending error:', error);
+    }
 };
 
 // Create Checkout Session route
@@ -91,13 +90,20 @@ app.post('/create-checkout-session', async (req, res) => {
         // Validate inputs
         if (!email || !ign || !discord || !coachingOption || !amount) {
             console.error('Validation error:', { email, ign, discord, coachingOption, amount });
-            return res.status(400).json({ error: 'All fields are required' });
+            return res.status(400).json({ error: 'All fields are required.' });
         }
 
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format.' });
+        }
+
+        // Validate coaching option and amount
         const validAmounts = [7000, 5000];
         if (!validAmounts.includes(amount)) {
             console.error('Invalid amount:', amount);
-            return res.status(400).json({ error: 'Invalid coaching option selected' });
+            return res.status(400).json({ error: 'Invalid coaching option selected.' });
         }
 
         console.log('Creating Stripe session for:', { email, coachingOption, amount });
@@ -111,7 +117,7 @@ app.post('/create-checkout-session', async (req, res) => {
                     price_data: {
                         currency: 'aud',
                         product_data: {
-                            name: coachingOption, // Tooltip-text passed from frontend
+                            name: coachingOption,
                             description: '1-on-1 Coaching Session'
                         },
                         unit_amount: amount,
@@ -138,9 +144,9 @@ app.post('/create-checkout-session', async (req, res) => {
 
 // Centralized Error Handling Middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err.message);
+    console.error('Unhandled Error:', err.message);
     res.status(err.status || 500).json({
-        error: err.message || 'Internal server error.',
+        error: err.message || 'Internal server error.'
     });
 });
 
