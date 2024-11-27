@@ -22,7 +22,7 @@ if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) 
 }
 
 // Configure CORS
-const allowedOrigins = ['https://prowleradc.github.io']; // Replace with your frontend URL
+const allowedOrigins = ['https://prowleradc.github.io'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
@@ -46,8 +46,8 @@ app.use(express.json({
 // Configure Nodemailer
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: 587, // Standard SMTP port
-    secure: false, // Use TLS
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
@@ -60,7 +60,7 @@ const sendConfirmationEmail = async (data) => {
 
     const mailOptions = {
         from: process.env.SMTP_USER,
-        to: email, // Send to customer email or admin email
+        to: email,
         subject: 'Coaching Session Confirmation',
         html: `
             <h1>Coaching Session Confirmation</h1>
@@ -77,7 +77,7 @@ const sendConfirmationEmail = async (data) => {
         `
     };
 
-    console.log(`Attempting to send confirmation email to: ${email}`); // Log the email recipient
+    console.log(`Attempting to send confirmation email to: ${email}`);
 
     try {
         await transporter.sendMail(mailOptions);
@@ -98,17 +98,9 @@ app.post('/create-checkout-session', async (req, res) => {
     try {
         const { email, ign, discord, coachingOption, amount } = req.body;
 
-        // Validate inputs
         if (!email || !ign || !discord || !coachingOption || !amount) {
             console.error('Validation error:', { email, ign, discord, coachingOption, amount });
             return res.status(400).json({ error: 'All fields are required.' });
-        }
-
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            console.error('Invalid email:', email);
-            return res.status(400).json({ error: 'Invalid email format.' });
         }
 
         const validOptions = {
@@ -143,7 +135,7 @@ app.post('/create-checkout-session', async (req, res) => {
             metadata: { email, ign, discord, coachingOption, amount }
         });
 
-        console.log('Checkout session created:', session.id); // Log the session ID
+        console.log('Checkout session created:', session.id);
         res.json({ url: session.url });
     } catch (error) {
         console.error('Stripe Checkout Session Error:', error.message);
@@ -153,14 +145,14 @@ app.post('/create-checkout-session', async (req, res) => {
 
 // Webhook endpoint for Stripe events
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    console.log('Webhook hit.');
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
     const sig = req.headers['stripe-signature'];
 
     let event;
     try {
-        console.log('Webhook received...'); // Initial log
         event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
-        console.log('Event received and verified:', event.type); // Log verified event type
+        console.log('Webhook event verified:', event.type);
     } catch (err) {
         console.error('Webhook signature verification failed:', err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -168,13 +160,11 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        console.log('Checkout session completed:', session);
+        console.log('Processing checkout.session.completed:', session);
 
         try {
-            // Log metadata before sending emails
             console.log('Session metadata:', session.metadata);
 
-            // Send confirmation email to user
             await sendConfirmationEmail({
                 email: session.metadata.email,
                 ign: session.metadata.ign,
@@ -182,9 +172,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 coachingOption: session.metadata.coachingOption,
                 amount: session.amount_total
             });
-            console.log('User confirmation email sent successfully.');
 
-            // Send confirmation email to admin
+            console.log('Confirmation email sent to user successfully.');
+
             await sendConfirmationEmail({
                 email: 'prowleradc@gmail.com',
                 ign: session.metadata.ign,
@@ -192,13 +182,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                 coachingOption: session.metadata.coachingOption,
                 amount: session.amount_total
             });
-            console.log('Admin confirmation email sent successfully.');
+
+            console.log('Confirmation email sent to admin successfully.');
         } catch (error) {
-            console.error('Error processing confirmation emails:', error.message);
+            console.error('Error sending emails:', error.message);
         }
     }
 
-    res.status(200).send('Webhook received successfully.');
+    res.status(200).send('Webhook processed successfully.');
 });
 
 // Start the server
