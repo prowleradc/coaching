@@ -172,6 +172,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
         // Send confirmation email after successful payment
         try {
+            // Check if metadata is correct
+            console.log(`Session metadata: ${JSON.stringify(session.metadata)}`);
+            
             // Sending confirmation email to the user
             await sendConfirmationEmail({
                 email: session.metadata.email,
