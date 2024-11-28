@@ -8,6 +8,11 @@ const stripe = require('stripe')(
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 
+const bodyParser = require('body-parser')
+
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+
 const app = express();
 
 // Validate environment variables
@@ -22,7 +27,7 @@ if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) 
 }
 
 // Configure CORS
-const allowedOrigins = ['https://prowleradc.github.io']; // Replace with your frontend URL
+const allowedOrigins = ['https://prowleradc.github.io', 'http://localhost:3000', 'null']; // Replace with your frontend URL
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
@@ -35,13 +40,13 @@ app.use(cors({
 }));
 
 // Stripe requires raw body for webhook signature verification
-app.use(express.json({
-    verify: (req, res, buf) => {
-        if (req.originalUrl.startsWith('/webhook')) {
-            req.rawBody = buf.toString();
-        }
+app.use((req, res, next) => {
+    if (req.originalUrl === '/webhook') {
+        next();
+    } else {
+        bodyParser.json()(req, res, next)
     }
-}));
+});
 
 // Configure Nodemailer
 const transporter = nodemailer.createTransport({
@@ -98,6 +103,8 @@ app.post('/create-checkout-session', async (req, res) => {
     try {
         const { email, ign, discord, coachingOption, amount } = req.body;
 
+        req.headers['access-control-allow-origin'] = "*";
+
         // Validate inputs
         if (!email || !ign || !discord || !coachingOption || !amount) {
             console.error('Validation error:', { email, ign, discord, coachingOption, amount });
@@ -121,6 +128,7 @@ app.post('/create-checkout-session', async (req, res) => {
             console.error('Invalid coaching option or amount:', { coachingOption, amount });
             return res.status(400).json({ error: 'Invalid coaching option selected.' });
         }
+
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -152,14 +160,14 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 // Webhook endpoint for Stripe events
-app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    const sig = req.headers['stripe-signature'];
-
+app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+    
     let event;
     try {
+        const sig = req.headers['stripe-signature'];
+        console.log(sig);
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
         console.log('Webhook received...'); // Initial log
-        event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
         console.log('Event received and verified:', event.type); // Log verified event type
     } catch (err) {
         console.error('Webhook signature verification failed:', err.message);
@@ -205,4 +213,5 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(process.env.NODE_ENV);
 });
